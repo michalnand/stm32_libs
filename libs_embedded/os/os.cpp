@@ -35,7 +35,11 @@ __attribute__((naked)) void PendSV_Handler(void)
         tcb[g_current_task_ptr].sp = sp;
 
         // next task scheduling, round robin
-        g_current_task_ptr = (g_current_task_ptr+1)%g_task_count;
+        g_current_task_ptr = g_current_task_ptr+1;
+        if (g_current_task_ptr >= g_task_count)
+        {
+            g_current_task_ptr = 0;
+        }
     }
     // system is in init mode, skip saving SP
     else

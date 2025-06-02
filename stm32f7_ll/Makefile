@@ -6,7 +6,7 @@ USER_PATH    	= usr/
 COMMON_PATH   	= $(EMBEDDED_PATH)/common/
 OS_PATH   		= $(EMBEDDED_PATH)/os/
 MATH_PATH   	= $(EMBEDDED_PATH)/tmath/
-STM_PATH   		= $(EMBEDDED_PATH)/stm32fxx/
+STM_PATH   		= $(EMBEDDED_PATH)/stm32f7xx/
 
 # paths to stm libs : CMSIS, HAL ... 
 DEVICE_PATH		= $(STM_PATH)/device/
