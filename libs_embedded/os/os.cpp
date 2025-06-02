@@ -16,6 +16,8 @@ extern "C" {
 
 __attribute__((naked)) void PendSV_Handler(void) 
 {
+    volatile uint32_t sp;
+
     // store context
     __asm volatile( "push {r4-r7}\n\t"
         "mov r4, r8\n\t"
@@ -23,30 +25,29 @@ __attribute__((naked)) void PendSV_Handler(void)
         "mov r6, r10\n\t"
         "mov r7, r11\n\t"
         "push {r4-r7}\n\t"
+        "mrs %0, msp \n\t" :  "=r" (sp)
     );
 
-    volatile uint32_t sp = (uint32_t)__get_MSP();
-
-    // system is in start mode, skip saving SP
-    if (g_current_task_ptr == -1)
+     // normal mode, store stack pointer and schdule next task
+    if (g_current_task_ptr != -1)
     {
-        g_current_task_ptr = 0;
-    }
-    // normal mode, store stack pointer
-    else    
-    {
+        // store stack pointer
         tcb[g_current_task_ptr].sp = sp;
 
         // next task scheduling, round robin
         g_current_task_ptr = (g_current_task_ptr+1)%g_task_count;
     }
+    // system is in init mode, skip saving SP
+    else
+    {
+        g_current_task_ptr = 0;
+    }
+
 
     // next task stack pointer
     sp = tcb[g_current_task_ptr].sp;   
 
-    // thread mode return, with MSP
-    uint32_t int_return = 0xfffffff9;    
-
+    // thread mode return, with MSP 
     // restore context
     __asm volatile( "mov lr, %0\n\t"  
         "msr msp, %1\n\t"
@@ -56,7 +57,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "mov r10, r6\n\t"
         "mov r11, r7\n\t"
         "pop {r4-r7}\n\t"
-        "bx lr\n\t" : : "r" (int_return), "r" (sp)
+        "bx lr\n\t" : : "r" (0xfffffff9), "r" (sp)
     );
 }
 
@@ -121,13 +122,14 @@ void os_start()
     g_current_task_ptr = -1;
 
     // enable PendSV and SysTick interrupt
-    NVIC_SetPriority(PendSV_IRQn, 0xff);  //lowest priority
-	NVIC_SetPriority(SysTick_IRQn, 0x00); //highest priority
+    // init with low priority
+    NVIC_SetPriority(PendSV_IRQn, 0xff);
+	NVIC_SetPriority(SysTick_IRQn, 0xfe);
 
     // 1ms scheduling  time
     SysTick_Config(SystemCoreClock / OS_FREQUENCY);
 
-    // trigger PendSV -> start with first task
+    // trigger PendSV, start with first task
     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 
     while (1)
