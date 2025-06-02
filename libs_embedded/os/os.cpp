@@ -1,12 +1,12 @@
 #include "os.h"
 
-volatile int32_t g_current_task_ptr, g_task_count;
-
 struct sTCB
 {
     uint32_t sp;
 };
 
+
+volatile int32_t g_current_task_ptr, g_task_count;
 volatile sTCB tcb[OS_MAX_TASK_COUNT];
 
 
@@ -28,7 +28,7 @@ __attribute__((naked)) void PendSV_Handler(void)
         "mrs %0, msp \n\t" :  "=r" (sp)
     );
 
-     // normal mode, store stack pointer and schdule next task
+    // normal mode, store stack pointer and schdule next task
     if (g_current_task_ptr != -1)
     {
         // store stack pointer
