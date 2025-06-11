@@ -2,18 +2,6 @@
 #define _GPIO_H_
 
 
-#define TGPIOA    ((unsigned char)0)
-#define TGPIOB    ((unsigned char)1)
-#define TGPIOC    ((unsigned char)2)
-#define TGPIOD    ((unsigned char)3)
-#define TGPIOE    ((unsigned char)4)
-#define TGPIOF    ((unsigned char)5)
-#define TGPIOG    ((unsigned char)6)
-#define TGPIOH    ((unsigned char)7)
-#define TGPIOI    ((unsigned char)8)
-#define TGPIOJ    ((unsigned char)9)
-
-
 #define GPIO_MODE_OUT             0       //push-pull output mode
 #define GPIO_MODE_IN_FLOATING     1       //input mode
 #define GPIO_MODE_IN_PULLUP       2       //input mode with pullup
@@ -81,53 +69,94 @@ class Gpio
 
     void init()
     {
+      #ifdef RCC_AHB1ENR_GPIOAEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOAEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOBEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOBEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOCEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOCEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIODEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIODEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOEEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOEEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOFEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOFEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOGEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOGEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOHEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOHEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOIEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOIEN;
+      #endif
+
+      #ifdef RCC_AHB1ENR_GPIOJEN
+      RCC->AHB1ENR|= RCC_AHB1ENR_GPIOJEN;
+      #endif
+
+      
       #ifdef GPIOA
-      if (gpio == TGPIOA)
+      if (gpio == 'A')
         GPIOx = GPIOA;
       #endif
 
       #ifdef GPIOB
-      if (gpio == TGPIOB)
+      if (gpio == 'B')
         GPIOx = GPIOB;
       #endif
 
       #ifdef GPIOC
-      if (gpio == TGPIOC)
+      if (gpio == 'C')
         GPIOx = GPIOC;
       #endif
 
       #ifdef GPIOD
-      if (gpio == TGPIOD)
+      if (gpio == 'D')
         GPIOx = GPIOD;
       #endif
  
       #ifdef GPIOE
-      if (gpio == TGPIOE)
+      if (gpio == 'E')
         GPIOx = GPIOE;
       #endif
 
       #ifdef GPIOF
-      if (gpio == TGPIOF)
+      if (gpio == 'F')
         GPIOx = GPIOF;
       #endif
 
       #ifdef GPIOG
-      if (gpio == TGPIOG)
+      if (gpio == 'G')
         GPIOx = GPIOG;
       #endif
 
       #ifdef GPIOH
-      if (gpio == TGPIOH)
+      if (gpio == 'H')
         GPIOx = GPIOH;
       #endif
 
       #ifdef GPIOI
-      if (gpio == TGPIOI)
+      if (gpio == 'I')
         GPIOx = GPIOI;
       #endif
 
       #ifdef GPIOJ
-      if (gpio == TGPIOJ)
+      if (gpio == 'J')
         GPIOx = GPIOJ;
       #endif 
 
@@ -139,7 +168,7 @@ class Gpio
          if (pin_mode == GPIO_MODE_OUT)
          {
            //gpio speed 50MHz
-           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED0 << (pin * 2));
+           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0 << (pin * 2));
            GPIOx->OSPEEDR |= ((uint32_t)(0x03) << (pin * 2));
 
            //push-pull output
@@ -147,7 +176,7 @@ class Gpio
            GPIOx->OTYPER |= (uint16_t)(((uint16_t)0x00) << ((uint16_t)pin));
 
            //pin as output
-           GPIOx->MODER  &= ~(GPIO_MODER_MODE0 << (pin * 2));
+           GPIOx->MODER  &= ~(GPIO_MODER_MODER0 << (pin * 2));
            GPIOx->MODER |= (((uint32_t)0x01) << (pin * 2));
          }
 
@@ -155,11 +184,11 @@ class Gpio
          if (pin_mode == GPIO_MODE_IN_FLOATING)
          {
            //gpio speed 50MHz
-           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED0 << (pin * 2));
+           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0 << (pin * 2));
            GPIOx->OSPEEDR |= ((uint32_t)(0x03) << (pin * 2));
 
            //pin as output
-           GPIOx->MODER  &= ~(GPIO_MODER_MODE0 << (pin * 2));
+           GPIOx->MODER  &= ~(GPIO_MODER_MODER0 << (pin * 2));
            GPIOx->MODER |= (((uint32_t)0x00) << (pin * 2));
          }
 
@@ -167,11 +196,11 @@ class Gpio
          if (pin_mode == GPIO_MODE_IN_PULLUP)
          {
            //gpio speed 50MHz
-           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED0 << (pin * 2));
+           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0 << (pin * 2));
            GPIOx->OSPEEDR |= ((uint32_t)(0x03) << (pin * 2));
 
            //pin as output
-           GPIOx->MODER  &= ~(GPIO_MODER_MODE0 << (pin * 2));
+           GPIOx->MODER  &= ~(GPIO_MODER_MODER0 << (pin * 2));
            GPIOx->MODER |= (((uint32_t)0x00) << (pin * 2));
 
            //pullup enable
@@ -186,11 +215,11 @@ class Gpio
          if (pin_mode == GPIO_MODE_AF)
          {
            //gpio speed 50MHz
-           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED0 << (pin * 2));
+           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0 << (pin * 2));
            GPIOx->OSPEEDR |= ((uint32_t)(0x03) << (pin * 2));
 
            //pin as output
-           GPIOx->MODER  &= ~(GPIO_MODER_MODE0 << (pin * 2));
+           GPIOx->MODER  &= ~(GPIO_MODER_MODER0 << (pin * 2));
            GPIOx->MODER |= (((uint32_t)0x02) << (pin * 2));
          }
 
@@ -198,7 +227,7 @@ class Gpio
          if (pin_mode == GPIO_MODE_AN)
          {
            //pin as output
-           GPIOx->MODER  &= ~(GPIO_MODER_MODE0 << (pin * 2));
+           GPIOx->MODER  &= ~(GPIO_MODER_MODER0 << (pin * 2));
            GPIOx->MODER |= (((uint32_t)0x03) << (pin * 2));
          }
 
@@ -206,7 +235,7 @@ class Gpio
          if (pin_mode == GPIO_MODE_OUT_OD)
          {
            //gpio speed 50MHz
-           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEED0 << (pin * 2));
+           GPIOx->OSPEEDR &= ~(GPIO_OSPEEDR_OSPEEDR0 << (pin * 2));
            GPIOx->OSPEEDR |= ((uint32_t)(0x03) << (pin * 2));
 
            //open drain output
@@ -214,7 +243,7 @@ class Gpio
            GPIOx->OTYPER |= (uint16_t)(((uint16_t)0x01) << ((uint16_t)pin));
 
            //pin as output
-           GPIOx->MODER  &= ~(GPIO_MODER_MODE0 << (pin * 2));
+           GPIOx->MODER  &= ~(GPIO_MODER_MODER0 << (pin * 2));
            GPIOx->MODER |= (((uint32_t)0x01) << (pin * 2));
          }
        }

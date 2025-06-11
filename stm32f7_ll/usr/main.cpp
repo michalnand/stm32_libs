@@ -3,47 +3,102 @@
 //#include "tmath.h"
 
 #include "drivers.h"
-#include "gpio.h"
+#include "common.h"
 
 
+Terminal terminal;
+Timer timer;
+
+TI2C<'C', 0, 3> i2c;
+SSD1315 oled;
+
+
+uint32_t g_random_val;
+
+uint32_t get_random()
+{
+    g_random_val = (uint32_t)1103515245*g_random_val + 12345;
+    return g_random_val;
+}
+
+
+float pi_test(uint32_t iterations)
+{
+    float pi = 0.0f;
+    float sgn = 1.0f;
+
+    for (float i = 0.0f; i < (float)iterations; i+= 1.0f)
+    {
+        pi+= sgn*1.0f/(2.0f*i + 1.0f);
+        sgn = -sgn;
+    }
+
+    pi = pi*4.0f;
+
+    return pi;
+}
 
 int main() 
 {        
-    drivers_init();   
+    drivers_init();  
+    uart_init();
 
-    //RCC->AHB1ENR|= RCC_AHB1ENR_GPIOBEN;
-
-    /*
-    GPIO_TypeDef *GPIOx = GPIOB;
-
-    uint32_t pin = 2;
-
-    //gpio speed 50MHz
-    GPIOx->OSPEEDR &= ~(GPIO_OSPEEDER_OSPEEDR0 << (pin * 2));
-    GPIOx->OSPEEDR |= ((uint32_t)(0x03) << (pin * 2));
-
-    //push-pull output
-    GPIOx->OTYPER &= ~((GPIO_OTYPER_OT_0) << ((uint16_t)pin));
-    GPIOx->OTYPER |= (uint16_t)(((uint16_t)0x00) << ((uint16_t)pin));
-
-    //pin as output
-    GPIOx->MODER  &= ~(GPIO_MODER_MODER0 << (pin * 2));
-    GPIOx->MODER |= (((uint32_t)0x01) << (pin * 2));
+    terminal << "\n\nuart init done\n";
     
-    GPIOx->ODR|= (1<<pin); 
-    */
 
-    Gpio<'B', 2, GPIO_MODE_OUT> led;
-    led = 1;      
+    timer.init();
 
+  
+    Gpio<'B', 0, GPIO_MODE_OUT> led_1;
+    Gpio<'B', 7, GPIO_MODE_OUT> led_2;
+    Gpio<'B', 14, GPIO_MODE_OUT> led_3;
+    
+
+    i2c.init();
+    oled.init(i2c);
     
 
     while (1)
     {
-        led = 1;    
-        delay_loops(100000);
-        led = 0;
-        delay_loops(10000000);
+        uint8_t v = (get_random() >> 8);
+
+        if (v&(1<<0))
+        {
+            led_1 = 1;    
+        }
+        else
+        {
+            led_1 = 0;
+        }
+
+        if (v&(1<<1))
+        {
+            led_2 = 1;    
+        }
+        else
+        {
+            led_2 = 0;
+        }
+
+        if (v&(1<<2))
+        {
+            led_3 = 1;    
+        }
+        else
+        {
+            led_3 = 0;
+        }
+        
+        uint32_t time = timer.get_time()/1000;
+
+        uint32_t pi = pi_test(1000000)*100000000;
+
+        terminal << "uptime = " << time << "\n";
+        terminal << "pi  = " << pi << "\n";
+        
+        oled.put_info("uptime", time, 0);
+
+        timer.delay_ms(500);
     }
     
     

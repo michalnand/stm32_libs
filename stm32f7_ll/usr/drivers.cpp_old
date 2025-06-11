@@ -143,8 +143,8 @@
 
 void drivers_init()
 {
-    SystemClock_HSE_Config();
-    //SystemClock_HSI_Config();
+    //SystemClock_HSE_Config();
+    SystemClock_HSI_Config();
     
     // FPU init, Set CP10 and CP11 Full Access
     SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2)); 

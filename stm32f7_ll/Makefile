@@ -11,7 +11,7 @@ STM_PATH   		= $(EMBEDDED_PATH)/stm32f7xx/
 # paths to stm libs : CMSIS, HAL ... 
 DEVICE_PATH		= $(STM_PATH)/device/
 HAL_PATH		= $(STM_PATH)/STM32F7xx_HAL_Driver/
-#DRIVERS_PATH	= $(STM_PATH)/drivers/
+DRIVERS_PATH	= $(STM_PATH)/drivers/
 
 
 
@@ -19,21 +19,23 @@ GCCPREFIX  = arm-none-eabi-
 OUTPUT     = bin/build
 
 
-TARGET     = -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -DSTM32F722xx -DUSE_FULL_LL_DRIVER
+#TARGET     = -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -DSTM32F722xx -DUSE_FULL_LL_DRIVER
+TARGET     = -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -DSTM32F722xx -DUSE_FULL_LL_DRIVER
 #TARGET 	   = -mcpu=cortex-m7 -mthumb -mfloat-abi=softfp -fsingle-precision-constant -DSTM32F722xx -DUSE_FULL_LL_DRIVER
+
 
 
 LDSCRIPT   = $(DEVICE_PATH)/linker_script.ld
 
 # Includes
-#INC+= -I$(COMMON_PATH)
+INC+= -I$(COMMON_PATH)
 #INC+= -I$(OS_PATH)
 INC+= -I$(MATH_PATH)
 INC+= -I$(DEVICE_PATH)
 INC+= -I$(DEVICE_PATH)/Include/
 INC+= -I$(DEVICE_PATH)/CMSIS/
 INC+= -I$(HAL_PATH)/Inc/
-#INC+= -I$(DRIVERS_PATH)
+INC+= -I$(DRIVERS_PATH)
 
 
 
@@ -50,9 +52,9 @@ C_SRCS+= $(shell find $(HAL_PATH)/Src/ -name 'stm32f7xx_ll*.c')
 
 # cpp sources
 CXX_SRCS = $(shell find $(USER_PATH) -name '*.cpp')
-#CXX_SRCS+= $(shell find $(COMMON_PATH) -name '*.cpp')
+CXX_SRCS+= $(shell find $(COMMON_PATH) -name '*.cpp')
 #CXX_SRCS+= $(shell find $(OS_PATH) -name '*.cpp')
-#CXX_SRCS+= $(shell find $(DRIVERS_PATH) -name '*.cpp')
+CXX_SRCS+= $(shell find $(DRIVERS_PATH) -name '*.cpp')
 
 
 

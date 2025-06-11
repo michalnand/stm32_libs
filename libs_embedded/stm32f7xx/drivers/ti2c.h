@@ -15,7 +15,7 @@
 #define SetHighSDA()  {sda.set_mode(GPIO_MODE_IN_FLOATING);}
 #define SetLowSDA()   {sda = 0; sda.set_mode(GPIO_MODE_OUT);}
 
-template<unsigned char port_name, uint16_t SDA_PIN, uint16_t SCL_PIN, int DELAY_CYCLES = 2>
+template<unsigned char port_name, uint16_t SDA_PIN, uint16_t SCL_PIN, int DELAY_CYCLES = 100>
 class TI2C : public I2C_Interface
 {   
     private:
