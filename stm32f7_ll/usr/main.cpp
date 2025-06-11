@@ -97,6 +97,7 @@ int main()
         terminal << "pi  = " << pi << "\n";
         
         oled.put_info("uptime", time, 0);
+        oled.put_info("pi", pi, 1);
 
         timer.delay_ms(500);
     }
