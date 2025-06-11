@@ -1,10 +1,10 @@
 //#include "drivers.h"
 //#include "common.h"
-//#include "tmath.h"
+
 
 #include "drivers.h"
 #include "common.h"
-
+#include "tmath.h"
 
 Terminal terminal;
 Timer timer;
@@ -36,6 +36,55 @@ float pi_test(uint32_t iterations)
     pi = pi*4.0f;
 
     return pi;
+}
+
+#define MAT_N       ((uint32_t)100)
+#define MAT_M       ((uint32_t)100)
+#define MAT_K       ((uint32_t)100)
+
+Matrix<int32_t, MAT_N, MAT_K> mat_a;
+Matrix<int32_t, MAT_K, MAT_M> mat_b;
+Matrix<int32_t, MAT_N, MAT_M> mat_c;
+
+float matmul_test()
+{
+    // fill matrix A
+    for (unsigned int i = 0; i < (MAT_N*MAT_K); i++)
+    {
+        float v = (get_random()%1000000)/1000000.0f;
+        v = v*100.0f;
+        if (get_random()%2)
+        {
+            v = -v;
+        }
+
+        mat_a[i] = v;
+    }
+
+    // fill matrix B
+    for (unsigned int i = 0; i < (MAT_K*MAT_M); i++)
+    {
+        float v = (get_random()%1000000)/1000000.0f;
+        v = v*100.0f;
+        if (get_random()%2)
+        {
+            v = -v;
+        }
+
+        mat_b[i] = v;
+    }
+
+    uint32_t time_start = timer.get_time();
+
+    mat_c = mat_a*mat_b;
+
+    uint32_t time_stop = timer.get_time();
+
+    uint32_t dt = time_stop - time_start;
+
+    float macs = ((MAT_N*MAT_M*MAT_K)/(dt*0.001f));
+    macs = macs/1000000.0f;
+    return macs;
 }
 
 int main() 
@@ -93,11 +142,15 @@ int main()
 
         uint32_t pi = pi_test(1000000)*100000000;
 
+        float macs = matmul_test();
+
         terminal << "uptime = " << time << "\n";
         terminal << "pi  = " << pi << "\n";
+        terminal << "macs  = " << macs << "\n";
         
         oled.put_info("uptime", time, 0);
         oled.put_info("pi", pi, 1);
+        oled.put_info("macs", macs, 2);
 
         timer.delay_ms(500);
     }

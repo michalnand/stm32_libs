@@ -20,7 +20,7 @@ OUTPUT     = bin/build
 
 
 #TARGET     = -mcpu=cortex-m7 -mthumb -mfpu=fpv5-d16 -mfloat-abi=hard -DSTM32F722xx -DUSE_FULL_LL_DRIVER
-TARGET     = -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -DSTM32F722xx -DUSE_FULL_LL_DRIVER
+TARGET     = -mcpu=cortex-m7 -mthumb -mfpu=fpv5-sp-d16 -mfloat-abi=hard -ffast-math -DSTM32F722xx -DUSE_FULL_LL_DRIVER
 #TARGET 	   = -mcpu=cortex-m7 -mthumb -mfloat-abi=softfp -fsingle-precision-constant -DSTM32F722xx -DUSE_FULL_LL_DRIVER
 
 

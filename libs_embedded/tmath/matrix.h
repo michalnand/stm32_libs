@@ -121,29 +121,42 @@ class Matrix
         /*
             matmul 
 
-            mat_y.shape(M, K)
+            mat_y.shape(M, C)
             mat_a.shape(M, N) (this)
-            mat_b.shape(N, K) (rhs)
+            mat_b.shape(N, C) (rhs)
 
             y = a*b
         */
-        template<unsigned int K>
-        Matrix<DType, M, K> operator *( Matrix<DType, N, K> &rhs)
+        template<unsigned int C>
+        Matrix<DType, M, C> operator *( Matrix<DType, N, C> &rhs)
         {
-            Matrix<DType, M, K> result; 
+            Matrix<DType, M, C> result; 
 
             for (unsigned int m = 0; m < M; m++)
             {
-                for (unsigned int k = 0; k < K; k++)
+                for (unsigned int k = 0; k < C; k++)
                 {
-                    DType sum = 0; 
+                    DType sum = 0;
 
-                    for (unsigned int n = 0; n < N; n++)
+                    const DType* __restrict rowA = &x[m * N];
+                    const DType* __restrict colB = &rhs.x[k];
+                    
+                    // Manual loop unrolling (assuming N is divisible by 4 or small)
+                    unsigned int n = 0;
+                    for (; n + 3 < N; n += 4)
                     {
-                        sum+= x[m*N + n]*rhs[n*K + k];
-                    }  
+                        sum += rowA[n]     * colB[n * C];
+                        sum += rowA[n + 1] * colB[(n + 1) * C];
+                        sum += rowA[n + 2] * colB[(n + 2) * C];
+                        sum += rowA[n + 3] * colB[(n + 3) * C];
+                    }
 
-                    result[m*K + k] = sum;
+                    for (; n < N; ++n)
+                    {
+                        sum += rowA[n] * colB[n * C];
+                    }
+
+                    result.x[m * C + k] = sum;
                 }
             }
 
