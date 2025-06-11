@@ -10,9 +10,9 @@ Timer timer;
 TI2C<TGPIOA, 0, 1> i2c;
 SSD1315 oled;
 
+                
 
-
-
+#include "tml.h"
 
 
 
@@ -58,7 +58,7 @@ void task_1()
         gy_ofs+= gy;
         gz_ofs+= gz;    
 
-        timer.delay_ms(5);
+        os_delay_ms(5);
     }
 
     gx_ofs/= 100;
@@ -95,15 +95,14 @@ void task_1()
         {
             terminal << gx_fil << " " << gy_fil << " " << gz_fil << "\n";
 
-            oled.put_info("timer", timer.get_time()/1000, 0);
+            oled.put_info("timer sec", timer.get_time()/1000, 0);
             oled.put_info("gx ", gx_fil, 1);
             oled.put_info("gy ", gy_fil, 2);
             oled.put_info("gz ", gz_fil, 3);          
         }
 
         steps++;
-        timer.delay_ms(1);
-        os_yield();
+        os_delay_ms(1);
     }
 }
 
@@ -132,8 +131,7 @@ void task_2()
         pwm_set(pwm_r/5, pwm_g/5, pwm_b/5, 0);
        
         steps++;
-        timer.delay_ms(5);
-        os_yield();
+        os_delay_ms(5);
     }
 }
 
@@ -160,7 +158,5 @@ int main()
 
     os_start();
   
-    
-    
     return 0;
 }

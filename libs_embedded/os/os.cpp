@@ -6,6 +6,7 @@ struct sTCB
 };
 
 
+volatile uint32_t g_os_time;
 volatile int32_t g_current_task_ptr, g_task_count;
 volatile sTCB tcb[OS_MAX_TASK_COUNT];
 
@@ -67,6 +68,8 @@ __attribute__((naked)) void PendSV_Handler(void)
 
 void SysTick_Handler(void) 
 {
+    g_os_time++;
+
     // trigger PendSV interrupt for context switch
 	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
@@ -79,6 +82,7 @@ void SysTick_Handler(void)
 
 void os_init()
 {
+    g_os_time          = 0;
     g_task_count       = 0;
 
     for (unsigned int i = 0; i < OS_MAX_TASK_COUNT; i++)
@@ -141,11 +145,28 @@ void os_start()
         __asm("wfi");
     }
 }
-
+        
 
 void os_yield()
 {
     // trigger context switch
     SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
     __asm volatile ("wfi"); 
+}
+
+
+void os_delay_ms(uint32_t time_ms)
+{
+    time_ms = (time_ms*OS_FREQUENCY)/1000;
+
+    volatile uint32_t time_stop;
+
+    __disable_irq();
+    time_stop = g_os_time + time_ms;
+    __enable_irq();
+
+    while (time_stop > g_os_time)
+    {
+        os_yield();
+    }
 }

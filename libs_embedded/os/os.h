@@ -19,6 +19,7 @@ void os_init();
 void os_add_task(void (*task_func)(void), uint32_t *sp, uint32_t sp_size);
 void os_start();
 void os_yield();
+void os_delay_ms(uint32_t time_ms);
 
 
 #endif
