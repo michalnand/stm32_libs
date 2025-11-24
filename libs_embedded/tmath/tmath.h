@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "constants.h"
+
 #include "array.h"
 #include "scalar.h"
 #include "vector.h"

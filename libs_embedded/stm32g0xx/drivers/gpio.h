@@ -2,16 +2,6 @@
 #define _GPIO_H_
 
 
-#define TGPIOA    ((unsigned char)0)
-#define TGPIOB    ((unsigned char)1)
-#define TGPIOC    ((unsigned char)2)
-#define TGPIOD    ((unsigned char)3)
-#define TGPIOE    ((unsigned char)4)
-#define TGPIOF    ((unsigned char)5)
-#define TGPIOG    ((unsigned char)6)
-#define TGPIOH    ((unsigned char)7)
-#define TGPIOI    ((unsigned char)8)
-#define TGPIOJ    ((unsigned char)9)
 
 
 #define GPIO_MODE_OUT             0       //push-pull output mode
@@ -82,54 +72,34 @@ class Gpio
     void init()
     {
       #ifdef GPIOA
-      if (gpio == TGPIOA)
+      if (gpio == 'A')
         GPIOx = GPIOA;
       #endif
 
       #ifdef GPIOB
-      if (gpio == TGPIOB)
+      if (gpio == 'B')
         GPIOx = GPIOB;
       #endif
 
       #ifdef GPIOC
-      if (gpio == TGPIOC)
+      if (gpio == 'C')
         GPIOx = GPIOC;
       #endif
 
       #ifdef GPIOD
-      if (gpio == TGPIOD)
+      if (gpio == 'D')
         GPIOx = GPIOD;
       #endif
  
       #ifdef GPIOE
-      if (gpio == TGPIOE)
+      if (gpio == 'E')
         GPIOx = GPIOE;
       #endif
 
       #ifdef GPIOF
-      if (gpio == TGPIOF)
+      if (gpio == 'F')
         GPIOx = GPIOF;
       #endif
-
-      #ifdef GPIOG
-      if (gpio == TGPIOG)
-        GPIOx = GPIOG;
-      #endif
-
-      #ifdef GPIOH
-      if (gpio == TGPIOH)
-        GPIOx = GPIOH;
-      #endif
-
-      #ifdef GPIOI
-      if (gpio == TGPIOI)
-        GPIOx = GPIOI;
-      #endif
-
-      #ifdef GPIOJ
-      if (gpio == TGPIOJ)
-        GPIOx = GPIOJ;
-      #endif 
 
       set_mode(mode);
     } 

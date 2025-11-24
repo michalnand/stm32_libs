@@ -1,91 +1,63 @@
-//#include "drivers.h"
-//#include "common.h"
-
 
 #include "drivers.h"
 #include "common.h"
 #include "tmath.h"
 
+#include "tft_display.h"
+
+#include "image.h"
+
 Terminal terminal;
-Timer timer;
-
-TI2C<'C', 0, 3> i2c;
-SSD1315 oled;
+Timer timer;    
 
 
-uint32_t g_random_val;
 
-uint32_t get_random()
+void fractal_demo(TFTDisplay &display, float cx, float cy)
 {
-    g_random_val = (uint32_t)1103515245*g_random_val + 12345;
-    return g_random_val;
-}
+    uint32_t w = display.width();
+    uint32_t h = display.height();
 
+    // Julia constant
+    //float cx = -0.7f;
+    //float cy = 0.27015f;
 
-float pi_test(uint32_t iterations)
-{
-    float pi = 0.0f;
-    float sgn = 1.0f;
+    uint32_t max_iter = 40;
 
-    for (float i = 0.0f; i < (float)iterations; i+= 1.0f)
+    display.set_full_screen();
+
+    for (unsigned int y = 0; y < h; y++)
     {
-        pi+= sgn*1.0f/(2.0f*i + 1.0f);
-        sgn = -sgn;
-    }
-
-    pi = pi*4.0f;
-
-    return pi;
-}
-
-#define MAT_N       ((uint32_t)100)
-#define MAT_M       ((uint32_t)100)
-#define MAT_K       ((uint32_t)100)
-
-Matrix<int32_t, MAT_N, MAT_K> mat_a;
-Matrix<int32_t, MAT_K, MAT_M> mat_b;
-Matrix<int32_t, MAT_N, MAT_M> mat_c;
-
-float matmul_test()
-{
-    // fill matrix A
-    for (unsigned int i = 0; i < (MAT_N*MAT_K); i++)
-    {
-        float v = (get_random()%1000000)/1000000.0f;
-        v = v*100.0f;
-        if (get_random()%2)
+        for (unsigned int x = 0; x < w; x++)
         {
-            v = -v;
-        }
+            float zx = 1.5f*2.0f*(y*1.0f/h - 0.5f);
+            float zy = 1.5f*2.0f*(x*1.0f/w - 0.5f);
 
-        mat_a[i] = v;
+            uint32_t i = 0; 
+            while (zx * zx + zy * zy < 4.0f && i < max_iter)
+            {
+                float tmp = zx * zx - zy * zy + cx;
+                zy = 2.0f * zx * zy + cy;
+                zx = tmp;
+                i++;
+            }
+            
+            if (i >= max_iter)
+            {
+                i = 0;
+            }   
+
+            uint8_t r = (i*7)%256;
+            uint8_t g = (i*3)%256;
+            uint8_t b = (i*8)%256;
+
+            display.set_pixel(r, g, b);
+        }
     }
 
-    // fill matrix B
-    for (unsigned int i = 0; i < (MAT_K*MAT_M); i++)
-    {
-        float v = (get_random()%1000000)/1000000.0f;
-        v = v*100.0f;
-        if (get_random()%2)
-        {
-            v = -v;
-        }
-
-        mat_b[i] = v;
-    }
-
-    uint32_t time_start = timer.get_time();
-
-    mat_c = mat_a*mat_b;
-
-    uint32_t time_stop = timer.get_time();
-
-    uint32_t dt = time_stop - time_start;
-
-    float macs = ((MAT_N*MAT_M*MAT_K)/(dt*0.001f));
-    macs = macs/1000000.0f;
-    return macs;
+    display.end_full_screen();
 }
+
+
 
 int main() 
 {        
@@ -97,63 +69,49 @@ int main()
 
     timer.init();
 
+
+    TFTDisplay display;
+    display.init();
+
   
     Gpio<'B', 0, GPIO_MODE_OUT> led_1;
     Gpio<'B', 7, GPIO_MODE_OUT> led_2;
     Gpio<'B', 14, GPIO_MODE_OUT> led_3;
     
 
-    i2c.init();
-    oled.init(i2c);
-    
+   
 
+    uint32_t state = 0;
+
+    float cx0 = -0.835f;
+    float cy0 = -0.2321f;
+    float cx1 = 0.0;
+    float cy1 = -0.8;
+    
+    
     while (1)
     {
-        uint8_t v = (get_random() >> 8);
+        uint32_t time_start = timer.get_time();
 
-        if (v&(1<<0))
-        {
-            led_1 = 1;    
-        }
-        else
-        {
-            led_1 = 0;
-        }
-
-        if (v&(1<<1))
-        {
-            led_2 = 1;    
-        }
-        else
-        {
-            led_2 = 0;
-        }
-
-        if (v&(1<<2))
-        {
-            led_3 = 1;    
-        }
-        else
-        {
-            led_3 = 0;
-        }
         
-        uint32_t time = timer.get_time()/1000;
 
-        uint32_t pi = pi_test(1000000)*100000000;
+        state = (state+1)%32;
 
-        float macs = matmul_test();
+        float k = state/32.0f;
+     
 
-        terminal << "uptime = " << time << "\n";
-        terminal << "pi  = " << pi << "\n";
-        terminal << "macs  = " << macs << "\n";
+        float cx = (1.0f - k)*cx0 + k*cx1;
+        float cy = (1.0f - k)*cy0 + k*cy1;
+
+        fractal_demo(display, cx, cy); 
         
-        oled.put_info("uptime", time, 0);
-        oled.put_info("pi", pi, 1);
-        oled.put_info("macs", macs, 2);
+        uint32_t time_stop = timer.get_time();
 
-        timer.delay_ms(500);
+        float fps = 1000.0f/(time_stop - time_start);
+
+        terminal << "fps = " << fps << "\n";
     }
+    
     
     
     return 0;

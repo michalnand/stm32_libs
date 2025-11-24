@@ -150,10 +150,13 @@ void drivers_init()
     SCB->CPACR |= ((3UL << 10*2) | (3UL << 11*2)); 
 
     // Enable I-Cache
-    SCB_EnableICache();
+    SCB_EnableICache(); 
 
     // Enable D-Cache
     SCB_EnableDCache();
+
+
+
     
     LL_APB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOA);
     LL_APB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOB);
@@ -166,6 +169,8 @@ void drivers_init()
     LL_APB1_GRP1_EnableClock(LL_AHB1_GRP1_PERIPH_GPIOI);
 
     __enable_irq();
+
+    NVIC_SetPriorityGrouping(3);  // preemption=4 bits, subpriority=0
 }
 
 void delay_loops(uint32_t steps) 

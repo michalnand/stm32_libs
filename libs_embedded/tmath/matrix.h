@@ -127,38 +127,41 @@ class Matrix
 
             y = a*b
         */
-        template<unsigned int C>
-        Matrix<DType, M, C> operator *( Matrix<DType, N, C> &rhs)
+        template<unsigned int K>
+        Matrix<DType, M, K> operator *( Matrix<DType, N, K> &rhs)
         {
-            Matrix<DType, M, C> result; 
+            Matrix<DType, M, K> result; 
 
             for (unsigned int m = 0; m < M; m++)
             {
-                for (unsigned int k = 0; k < C; k++)
+                DType sum = 0;
+                for (unsigned int k = 0; k < K; k++)
                 {
+                    
                     DType sum = 0;
 
                     const DType* __restrict rowA = &x[m * N];
-                    const DType* __restrict colB = &rhs.x[k];
+                    const DType* __restrict colB = &rhs[k];
                     
                     // Manual loop unrolling (assuming N is divisible by 4 or small)
                     unsigned int n = 0;
                     for (; n + 3 < N; n += 4)
                     {
-                        sum += rowA[n]     * colB[n * C];
-                        sum += rowA[n + 1] * colB[(n + 1) * C];
-                        sum += rowA[n + 2] * colB[(n + 2) * C];
-                        sum += rowA[n + 3] * colB[(n + 3) * C];
+                        sum += rowA[n]     * colB[n * K];
+                        sum += rowA[n + 1] * colB[(n + 1) * K];
+                        sum += rowA[n + 2] * colB[(n + 2) * K];
+                        sum += rowA[n + 3] * colB[(n + 3) * K];
                     }
 
                     for (; n < N; ++n)
                     {
-                        sum += rowA[n] * colB[n * C];
+                        sum += rowA[n] * colB[n * K];
                     }
-
-                    result.x[m * C + k] = sum;
+                    
+                    result[m * K + k] = sum;
                 }
             }
+           
 
             return result;
         }

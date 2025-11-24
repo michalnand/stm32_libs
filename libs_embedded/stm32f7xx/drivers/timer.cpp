@@ -1,21 +1,16 @@
 #include "timer.h"
 
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-volatile uint32_t g_timer;
+volatile uint32_t g_timer = 0;
 
-void TIM2_IRQHandler(void)
+void SysTick_Handler(void)
 {
-    if (LL_TIM_IsActiveFlag_UPDATE(TIM2))
-    {
-        LL_TIM_ClearFlag_UPDATE(TIM2);
-        g_timer++;
-    }
+    g_timer++;
 }
+
 
 #ifdef __cplusplus
 }
@@ -26,42 +21,33 @@ void Timer::init()
 {
     g_timer = 0;
 
-    // Enable TIM2 clock (APB1 group)
-    LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
+    // SysTick clock source = CPU clock (HCLK = 216 MHz)
+    SysTick->CTRL = 0;  
 
-    // Timer input clock is typically APB1 * 2 = 108 MHz (on F746, if APB1 prescaler != 1)
-    // For portability, use SystemCoreClock and adjust prescaler
-    uint32_t timer_clk = SystemCoreClock / 1; // Assume APB1 prescaler = 1 (check RCC config!)
-    LL_TIM_SetPrescaler(TIM2, (timer_clk / 1000000) - 1);   // 1 MHz timer clock
-    LL_TIM_SetAutoReload(TIM2, 1000 - 1);                   // 1ms period (1000 ticks at 1 MHz)
-    LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
-    LL_TIM_EnableARRPreload(TIM2);
+    // Reload for 1 ms tick
+    SysTick->LOAD = (SystemCoreClock / 1000) - 1;   // 1ms
 
-    // Enable update interrupt
-    LL_TIM_EnableIT_UPDATE(TIM2);
+    // Clear current value
+    SysTick->VAL = 0;
 
-    // Configure NVIC
-    NVIC_SetPriority(TIM2_IRQn, 0);
-    NVIC_EnableIRQ(TIM2_IRQn);
-
-    // Start counter
-    LL_TIM_EnableCounter(TIM2);
+    // Enable SysTick IRQ and SysTick timer
+    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk |   // CPU clock
+                    SysTick_CTRL_TICKINT_Msk   |   // Enable interrupt
+                    SysTick_CTRL_ENABLE_Msk;       // Start SysTick
 }
 
-    
+
 uint32_t Timer::get_time()
 {
     return g_timer;
-}   
-
-
-void Timer::delay_ms(uint32_t ms_time)
-{
-    uint32_t time_end = get_time() + ms_time;
-
-    while (get_time() < time_end)
-    {
-        __asm("nop");
-    }
 }
 
+
+void Timer::delay_ms(uint32_t ms)
+{
+    uint32_t end = g_timer + ms;
+    while (g_timer < end)
+    {
+        __asm__("nop");
+    }
+}

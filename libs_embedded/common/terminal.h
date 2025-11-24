@@ -9,6 +9,8 @@ class Terminal
     Terminal();
     virtual ~Terminal();
 
+    void init();
+
     void putc(char c);
     void puts(const char *s);
     void puts(char *s);

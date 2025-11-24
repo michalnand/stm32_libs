@@ -15,6 +15,11 @@ Terminal::~Terminal()
 
 }
 
+void Terminal::init()
+{
+
+}
+
 void Terminal::putc(char c)
 {
 	uart_putc(c);
