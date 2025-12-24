@@ -29,17 +29,27 @@ void Timer::init()
     // Enable TIM2 clock
     LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_TIM2);
 
-    // Set prescaler and ARR for 1ms interrupt  
-    LL_TIM_SetPrescaler(TIM2, 64 - 1);         // 64 MHz / 64 = 1 MHz
-    LL_TIM_SetAutoReload(TIM2, 1000 - 1);      // 1 MHz / 1000 = 1 kHz = 1 ms
+    // Disable counter during configuration
+    LL_TIM_DisableCounter(TIM2);
+
+    // Prescaler and ARR for 1 ms
+    LL_TIM_SetPrescaler(TIM2, 64 - 1);        // 64 MHz / 64 = 1 MHz
+    LL_TIM_SetAutoReload(TIM2, 1000 - 1);     // 1 MHz / 1000 = 1 kHz
+
     LL_TIM_SetCounterMode(TIM2, LL_TIM_COUNTERMODE_UP);
     LL_TIM_EnableARRPreload(TIM2);
+
+    // Force update event to load PSC & ARR
+    LL_TIM_GenerateEvent_UPDATE(TIM2);
+
+    // Clear update flag *before* enabling interrupt
+    LL_TIM_ClearFlag_UPDATE(TIM2);
 
     // Enable update interrupt
     LL_TIM_EnableIT_UPDATE(TIM2);
 
-    // Enable TIM2 NVIC interrupt
-    NVIC_SetPriority(TIM2_IRQn, 0);
+    // NVIC
+    NVIC_SetPriority(TIM2_IRQn, 1);
     NVIC_EnableIRQ(TIM2_IRQn);
 
     // Enable counter

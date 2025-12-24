@@ -12,10 +12,6 @@ class Timer
         void callback();
         uint32_t get_time();
         void delay_ms(uint32_t ms_time);
-
-
-    private:
-        uint32_t timer_ticks;
 };
 
 

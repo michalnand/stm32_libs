@@ -1,14 +1,14 @@
 
+
 #include "drivers.h"
 #include "common.h"
-#include "tmath.h"
-
 #include "tft_display.h"
-
-#include "image.h"
+/*
+#include "common.h"
+#include "tmath.h"
+*/
 
 Terminal terminal;
-Timer timer;    
 
 
 
@@ -59,8 +59,11 @@ void fractal_demo(TFTDisplay &display, float cx, float cy)
 
 
 
+
+
 int main() 
-{        
+{      
+    
     drivers_init();  
 
     Gpio<'A', 0, GPIO_MODE_OUT> led_0;
@@ -69,29 +72,17 @@ int main()
     Gpio<'A', 1, GPIO_MODE_OUT> led_1;
     led_1 = 1;
 
-    while (1)
-    {
-        __asm("nop");
-    }
-
     uart_init();
-
-    terminal << "\n\nuart init done\n";
+    terminal.init();
     
+    terminal << "uart init done\n";
+     
 
-    timer.init();
-
-
+    
+    // display demo
     TFTDisplay display;
     display.init();
-
-  
-    Gpio<'B', 0, GPIO_MODE_OUT> led_1;
-    Gpio<'B', 7, GPIO_MODE_OUT> led_2;
-    Gpio<'B', 14, GPIO_MODE_OUT> led_3;
-    
-
-   
+ 
 
     uint32_t state = 0;
 
@@ -100,12 +91,15 @@ int main()
     float cx1 = 0.0;
     float cy1 = -0.8;
     
-    
+    uint32_t cnt = 0;
     while (1)
     {
-        uint32_t time_start = timer.get_time();
+        if ((cnt%2) == 0)
+            led_0 = 1;
+        else
+            led_0 = 0;
 
-        
+        //uint32_t time_start = timer.get_time();
 
         state = (state+1)%32;
 
@@ -116,15 +110,32 @@ int main()
         float cy = (1.0f - k)*cy0 + k*cy1;
 
         fractal_demo(display, cx, cy); 
+
+        cnt++;
         
-        uint32_t time_stop = timer.get_time();
+        //uint32_t time_stop = timer.get_time();
 
-        float fps = 1000.0f/(time_stop - time_start);
+        //float fps = 1000.0f/(time_stop - time_start);
 
-        terminal << "fps = " << fps << "\n";
+        //terminal << "fps = " << fps << "\n";
     }
     
+
     
+
+    while (1)
+    {
+        led_0 = 1;
+        led_1 = 1;
+        delay_loops(10000000);
+
+        terminal << "hello stm32h7\n";
+        
+        led_0 = 0;
+        led_1 = 0;
+        delay_loops(10000000);
+    }
+
     
     return 0;
 }
